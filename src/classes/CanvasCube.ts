@@ -22,6 +22,9 @@ export class CanvasCube {
             this.width = this.canvasEditor.width;
             this.height = this.canvasEditor.height;
             this.layers = [];
+            canvasElement.oncontextmenu = function (e) {
+                console.log(e);
+            }
         }
         private addLayer (layer: Layer) {
             this.layers.push(layer);
@@ -94,6 +97,16 @@ export class CanvasCube {
                 });
             }
             fn();
+        }
+        public getLayerById (layerId: string): Layer {
+            return this.layers.filter(function (layer) {
+                return (layer.id==layerId);
+            })[0];
+        }
+        public layerToTop (layerId: string) {
+            var layerIndex = this.layers.indexOf(this.getLayerById(layerId));
+            var buff = this.layers[layerIndex];
+            console.log(layerIndex);
         }
 
 }

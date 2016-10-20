@@ -9,5 +9,6 @@ canvas.onclick = function (e) {
     console.log(layer);
     //canvasCube.insertRect('#123123', e.offsetX, e.offsetY, 20, 20);
 }
+window.canvasCube = canvasCube;
 
 console.log(canvasCube);

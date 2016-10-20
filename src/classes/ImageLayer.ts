@@ -20,5 +20,13 @@ export class ImageLayer extends Layer {
                 imageItem.height
             );
         }
+        moveItem (x: number, y: number) {
+            this.availableSpaces = {};
+            var item = <ImageItem> this.item;
+            item.x = x;
+            item.y = y;
+            this.setSquareBusySpace(x, y, item.width, item.height);
+            this.canvasCube.render();
+        }
 
 }

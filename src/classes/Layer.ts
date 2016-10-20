@@ -4,6 +4,7 @@ import {Item} from './Item.ts';
 export class Layer {
 
     // Attributes
+        id: string;
         canvasCube: CanvasCube;
         item: Item;
         availableSpaces: any;
@@ -11,6 +12,7 @@ export class Layer {
 
     // Methods
         constructor (canvasCube: CanvasCube) {
+            this.id = Math.floor(Math.random()*10000000)+'';
             this.canvasCube = canvasCube;
             this.availableSpaces = {};
         }
@@ -30,5 +32,6 @@ export class Layer {
                 }
             }
         }
+        moveItem (x: number, y: number) {}
 
 }
