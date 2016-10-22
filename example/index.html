@@ -5,7 +5,19 @@
 
         <canvas id="canvas" width="500" height="500"></canvas>
 
-        <script src="../dist/demo.bundle.js"></script>
+        <script src="../dist/main.bundle.js"></script>
+        <script>
+            var canvas = document.getElementById('canvas');
+            canvasCube = new CanvasCube(canvas);
+
+            canvasCube.insertImage('img.jpg', 20, 20, 100, 100);
+            canvas.onclick = function (e) {
+                let layer = canvasCube.getTopLayer(e.offsetX, e.offsetY);
+                console.log(layer);
+                //canvasCube.insertRect('#123123', e.offsetX, e.offsetY, 20, 20);
+            }
+            console.log(canvasCube);
+        </script>
     </body>
 
 </html>

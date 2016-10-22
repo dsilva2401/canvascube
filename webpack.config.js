@@ -3,7 +3,7 @@ var webpack = require('webpack');
 module.exports = {
     entry: {
         // main: "./src/classes/CanvasCube.ts",
-        demo: "./src/demo.ts"
+        main: "./src/main.ts"
     },
     output: {
         path: __dirname,
