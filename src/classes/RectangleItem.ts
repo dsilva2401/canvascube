@@ -3,25 +3,25 @@
 import * as Q from 'q';
 import {Item, ItemConstructorParams} from './Item.ts';
 
-export interface ImageItemConstructorParams extends ItemConstructorParams {
+export interface RectangleItemConstructorParams extends ItemConstructorParams {
     width: number;
     height: number;
-    imageSrc: string;
+    color: string;
 }
 
-export class ImageItem extends Item {
-    
+export class RectangleItem extends Item {
+
     // Attributes
         width: number;
         height: number;
-        imageSrc: string;
+        color: string;
 
     // Methods
-        constructor (params: ImageItemConstructorParams) {
+        constructor (params: RectangleItemConstructorParams) {
             super(params);
             this.width = params.width;
             this.height = params.height;
-            this.imageSrc = params.imageSrc;
+            this.color = params.color;
             this.resizeable = true;
         }
         getBusySpaces () {
@@ -40,8 +40,8 @@ export class ImageItem extends Item {
             );
         }
         render () {
-            return this.canvasEditor.drawImage(
-                this.imageSrc,
+            return this.canvasEditor.drawRect(
+                this.color,
                 this.x, this.y,
                 this.width, this.height
             );

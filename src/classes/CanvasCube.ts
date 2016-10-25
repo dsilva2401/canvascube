@@ -3,110 +3,125 @@
 import * as Q from 'q'; 
 import {CanvasEditor} from './CanvasEditor.ts';
 import {Layer} from './Layer.ts';
-import {ImageLayer} from './ImageLayer.ts';
-import {RectLayer} from './RectLayer.ts';
-import {ImageItem} from './ImageItem.ts';
-import {RectItem} from './RectItem.ts';
+import {Item} from './Item.ts';
+import {ImageItem, ImageItemConstructorParams} from './ImageItem.ts';
+import {RectangleItem, RectangleItemConstructorParams} from './RectangleItem.ts';
+
+interface InsertImageParams extends ImageItemConstructorParams {
+    layerId?: string;
+}
+interface InsertRectangleParams extends RectangleItemConstructorParams {
+    layerId?: string;
+}
 
 export class CanvasCube {
 
     // Attributes
         canvasEditor: CanvasEditor;
+        canvasElement: HTMLCanvasElement;
         width: number;
         height: number;
         layers: Layer[];
+        currentLayerId: string;
 
     // Methods
         constructor (canvasElement: HTMLCanvasElement) {
             this.canvasEditor = new CanvasEditor(canvasElement);
-            this.width = this.canvasEditor.width;
-            this.height = this.canvasEditor.height;
+            this.canvasElement = canvasElement;
+            this.width = this.canvasElement.width;
+            this.height = this.canvasElement.height;
+            this.currentLayerId = ''; 
             this.layers = [];
-            canvasElement.oncontextmenu = function (e) {
-                console.log(e);
-            }
         }
-        private addLayer (layer: Layer) {
+        newLayer () {
+            let layer = new Layer ({
+                width: this.width,
+                height: this.height
+             });
             this.layers.push(layer);
+            return;
         }
-        public insertImage (imgSrc: string, x: number, y: number, width: number, height: number) {
-            let imgItem = new ImageItem(imgSrc, x, y, width, height);
-            let imgLayer = new ImageLayer(this);
-            imgLayer.setItem(imgItem);
-            this.addLayer(imgLayer);
+        insertImage (params: InsertImageParams) {
+            params.canvasEditor = this.canvasEditor;
+            var imageItem = new ImageItem(params);
+            if (!this.layers.length) this.newLayer();
+            var layer = (
+                params.layerId ?
+                this.getLayerById(params.layerId) :
+                this.layers[this.layers.length-1]
+            );
+            layer.insertItem(imageItem);
             this.render();
         }
-        public insertRect (color: string, x: number, y: number, width: number, height: number) {
-            let rectItem = new RectItem(color, x, y, width, height);
-            let rectLayer = new RectLayer(this);
-            rectLayer.setItem(rectItem);
-            this.addLayer(rectLayer);
+        insertRectangle (params: InsertRectangleParams) {
+            params.canvasEditor = this.canvasEditor;
+            var rectangleItem = new RectangleItem(params);
+            if (!this.layers.length) this.newLayer();
+            var layer = (
+                params.layerId ?
+                this.getLayerById(params.layerId) :
+                this.layers[this.layers.length-1]
+            );
+            layer.insertItem(rectangleItem);
             this.render();
         }
-        public getTopLayer (x: number, y: number): Layer {
+        getItemAt (x: number, y: number): Item {
             for (var i=this.layers.length-1; i>=0; i--) {
-                if (this.layers[i].isBusy(x, y)) {
-                    return this.layers[i];
-                }
+                var item = this.layers[i].getItemAt(x, y); 
+                if (item) return item;
             }
             return null;
         }
-        private renderLayer (layer?: Layer) {
-            if (!layer) return;
-            let deferred = Q.defer();
-            var item;
-            switch (layer.type) {
-                case 'image':
-                    item = <ImageItem> layer.item;
-                    this.canvasEditor.drawImage(
-                        item.imgSrc,
-                        item.x,
-                        item.y,
-                        item.width,
-                        item.height
-                    ).then(() => {
-                        deferred.resolve();
-                    });
-                break;
-                case 'rect':
-                    item = <RectItem> layer.item;
-                    this.canvasEditor.drawRect(
-                        item.color,
-                        item.x,
-                        item.y,
-                        item.width,
-                        item.height
-                    );
-                    deferred.resolve();
-                break;
-            }
-            return deferred.promise;
+        getLayerById (layerId: string): Layer {
+            return this.layers.filter((layer) => {
+                return (layer.id==layerId);
+            })[0];
         }
-        public clear () {
+        reset () {
             this.layers = [];
             this.render();
         }
-        public render () {
+        render () {
+            var deferred = Q.defer();
             this.canvasEditor.clear();
             var currentLayer = 0;
             var fn = () => {
-                if (currentLayer>=this.layers.length) return;
-                this.renderLayer(this.layers[currentLayer]).then(() => {
+                if (currentLayer>=this.layers.length) {
+                    deferred.resolve();
+                    return;
+                }
+                this.layers[currentLayer].render().then(() => {
                     currentLayer++;
                     fn();
                 });
             }
             fn();
+            return deferred.promise;
         }
-        public getLayerById (layerId: string): Layer {
-            return this.layers.filter(function (layer) {
-                return (layer.id==layerId);
-            })[0];
+        getItemById (itemId: string): Item {
+            for (var i=0; i<this.layers.length; i++) {
+                var item = this.layers[i].items.filter((item) => {
+                    return (item.id == itemId);
+                })[0];
+                if (item) {
+                    return item;
+                }
+            }
+            return null;
         }
-        public layerToTop (layerId: string) {
-            var layerIndex = this.layers.indexOf(this.getLayerById(layerId));
-            var buff = this.layers[layerIndex];
-            console.log(layerIndex);
+        moveItem (itemId: string, x: number, y: number) {
+            var item = this.getItemById(itemId);
+            item.x = x;
+            item.y = y;
+            this.render();
+        }
+        resizeItem (itemId: string, width: number, height: number) {
+            var bitem = this.getItemById(itemId);
+            if (!bitem.resizeable) return;
+            var item = <ImageItem> bitem;
+            item.width = width;
+            item.height = height;
+            this.render();
         }
 
 }

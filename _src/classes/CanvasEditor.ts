@@ -21,7 +21,7 @@ export class CanvasEditor {
             this.context.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
         }
         public drawImage (imgSrc: string, x: number, y: number, width: number, height: number) {
-            var deferred = Q.defer();
+            var deferred = Q.defer(); 
             var img = document.createElement('img');
             img.src = imgSrc;
             img.width = width;
@@ -33,11 +33,8 @@ export class CanvasEditor {
             return deferred.promise;
         }
         public drawRect (color: string, x: number, y: number, width: number, height: number) {
-            var deferred = Q.defer();
             this.context.fillStyle = color;
             this.context.fillRect(x, y, width, height);
-            deferred.resolve();
-            return deferred.promise;
         }
         public getPixelColorHex (x: number, y: number) {
             var p = this.context.getImageData(x, y, 1, 1).data; 

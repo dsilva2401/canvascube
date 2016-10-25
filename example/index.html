@@ -10,10 +10,16 @@
             var canvas = document.getElementById('canvas');
             canvasCube = new CanvasCube(canvas);
 
-            canvasCube.insertImage('img.jpg', 20, 20, 100, 100);
+
+            canvasCube.insertImage({
+                imageSrc: 'img.jpg',
+                x: 20, y: 20,
+                width: 100, height: 100
+            })
+            //canvasCube.insertImage('img.jpg', 20, 20, 100, 100);
             canvas.onclick = function (e) {
-                let layer = canvasCube.getTopLayer(e.offsetX, e.offsetY);
-                console.log(layer);
+                let item = canvasCube.getItemAt(e.offsetX, e.offsetY);
+                console.log(item);
                 //canvasCube.insertRect('#123123', e.offsetX, e.offsetY, 20, 20);
             }
             console.log(canvasCube);

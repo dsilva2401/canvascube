@@ -1,37 +1,67 @@
+/// <reference path="../../typings/index.d.ts"/>
+
+import * as Q from 'q';
 import {CanvasCube} from './CanvasCube.ts';
 import {Item} from './Item.ts';
+
+interface LayerConstructorParams {
+    width: number;
+    height: number;
+}
 
 export class Layer {
 
     // Attributes
         id: string;
-        canvasCube: CanvasCube;
-        item: Item;
-        availableSpaces: any;
-        type: string;
+        items: Item [];
+        busySpaces: any;
+        width: number;
+        height: number;
 
     // Methods
-        constructor (canvasCube: CanvasCube) {
-            this.id = Math.floor(Math.random()*10000000)+'';
-            this.canvasCube = canvasCube;
-            this.availableSpaces = {};
+        constructor (params: LayerConstructorParams) {
+            this.id = Math.floor(Math.random()*100000000)+'';
+            this.busySpaces = {};
+            this.items = [];
+            this.width = params.width;
+            this.height = params.height;
         }
-        setItem (item: Item) {
-            this.item = item;
+        insertItem (item: Item) {
+            item.setCurrentLayer(this);
+            this.items.push(item);
+            this.fillBusySpaces();
         }
-        setAsBusySpace (x: number, y: number) {
-            this.availableSpaces[y*this.canvasCube.height+x] = true;
-        }
-        isBusy (x: number, y: number) {
-            return this.availableSpaces[y*this.canvasCube.height+x];
-        }
-        setSquareBusySpace  (x: number, y: number, width: number, height: number) {
-            for (var i=0; i<height; i++) {
-                for (var j=0; j<width; j++) {
-                    this.setAsBusySpace(x+j, y+i);
+        render () {
+            var deferred = Q.defer();
+            var currentItem = 0;
+            var fn = () => {
+                if (currentItem>=this.items.length) {
+                    deferred.resolve();
+                    return;
                 }
+                this.items[currentItem].render().then(() => {
+                    currentItem++;
+                    fn();
+                });
             }
+            fn();
+            this.fillBusySpaces();
+            return deferred.promise;
         }
-        moveItem (x: number, y: number) {}
+        fillBusySpaces () {
+            this.busySpaces = {};
+            this.items.forEach((item) => {
+                Object.keys(item.getBusySpaces()).forEach((spaceAddress) => {
+                    this.busySpaces[spaceAddress] = 1;
+                })
+            });
+        }
+        getItemAt (x: number, y: number): Item {
+            if (!this.busySpaces[this.width*y+x]) return null;
+            for (var i=this.items.length-1; i>=0; i--) {
+                if (this.items[i].isBusy(x, y)) return this.items[i];
+            }
+            return null;
+        }
 
 }
