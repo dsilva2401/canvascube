@@ -52,6 +52,7 @@ export class CanvasCube {
             );
             layer.insertItem(imageItem);
             this.render();
+            return imageItem;
         }
         insertRectangle (params: InsertRectangleParams) {
             params.canvasEditor = this.canvasEditor;
@@ -64,6 +65,7 @@ export class CanvasCube {
             );
             layer.insertItem(rectangleItem);
             this.render();
+            return rectangleItem;
         }
         getItemAt (x: number, y: number): Item {
             for (var i=this.layers.length-1; i>=0; i--) {
